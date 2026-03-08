@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   Trophy, 
@@ -15,7 +15,6 @@ import {
   RotateCcw, 
   Settings2,
   CheckCircle2,
-  Download,
   Copy,
   UserPlus,
   FileDown,
@@ -84,10 +83,10 @@ export default function App() {
 
     Papa.parse(file, {
       complete: (results) => {
-        const newPeople: Person[] = results.data
+        const newPeople: Person[] = (results.data as string[][])
           .flat()
-          .filter((name: any) => typeof name === 'string' && name.trim() !== '')
-          .map((name: any) => ({
+          .filter((name) => typeof name === 'string' && name.trim() !== '')
+          .map((name) => ({
             id: Math.random().toString(36).substr(2, 9),
             name: name.trim()
           }));
@@ -128,7 +127,7 @@ export default function App() {
     setShowClearConfirm(false);
   };
 
-  const exportToCSV = (data: any[], filename: string, headers: string[]) => {
+  const exportToCSV = (data: Record<string, string | number>[], filename: string, headers: string[]) => {
     const csvContent = data.map(row => 
       headers.map(header => row[header] || '').join(',')
     ).join('\n');
