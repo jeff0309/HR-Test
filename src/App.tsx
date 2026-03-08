@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Trophy, 
@@ -23,7 +23,10 @@ import {
   CheckCircle2,
   BarChart3,
   Copy,
-  X
+  X,
+  Eye,
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Papa from 'papaparse';
@@ -36,6 +39,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('list');
   const [people, setPeople] = useState<Person[]>([]);
   const [inputText, setInputText] = useState('');
+  
+  // Login Enhancement State
+  const [showPassword, setShowPassword] = useState(false);
+  const [captchaCode, setCaptchaCode] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
   
   // Lucky Draw State
   const [isDrawing, setIsDrawing] = useState(false);
@@ -151,17 +160,37 @@ export default function App() {
     document.body.removeChild(link);
   };
 
+  const generateCaptcha = () => {
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    setCaptchaCode(code);
+    setCaptchaInput('');
+    setCaptchaError('');
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const user = formData.get('username');
     const pass = formData.get('password');
 
+    if (captchaInput !== captchaCode) {
+      setCaptchaError('驗證碼錯誤');
+      generateCaptcha();
+      return;
+    }
+
     if (user === 'admin' && pass === 'admin123') {
       setIsLoggedIn(true);
       setLoginError('');
+      setCaptchaError('');
     } else {
       setLoginError('帳號或密碼錯誤');
+      setCaptchaError('');
+      generateCaptcha();
     }
   };
 
@@ -252,22 +281,58 @@ export default function App() {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-wider text-[#141414]/40 ml-1">密碼</label>
-              <input 
-                name="password"
-                type="password" 
-                required
-                placeholder="Password"
-                className="w-full p-4 bg-[#F5F5F0] border-none rounded-xl focus:ring-2 focus:ring-[#141414]/10 transition-all outline-none"
-              />
+              <div className="relative">
+                <input 
+                  name="password"
+                  type={showPassword ? "text" : "password"} 
+                  required
+                  placeholder="Password"
+                  className="w-full p-4 bg-[#F5F5F0] border-none rounded-xl focus:ring-2 focus:ring-[#141414]/10 transition-all outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#141414]/40 hover:text-[#141414] transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
-            {loginError && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#141414]/40 ml-1">驗證碼</label>
+              <div className="flex gap-3">
+                <input 
+                  type="text" 
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  required
+                  placeholder="請輸入右側數字"
+                  className="flex-1 p-4 bg-[#F5F5F0] border-none rounded-xl focus:ring-2 focus:ring-[#141414]/10 transition-all outline-none"
+                />
+                <div className="flex items-center gap-2 px-4 bg-white border border-[#141414]/10 rounded-xl">
+                  <span className="font-mono font-black italic tracking-widest text-lg select-none">
+                    {captchaCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={generateCaptcha}
+                    className="p-1 hover:bg-[#F5F5F0] rounded-lg transition-colors text-blue-600"
+                    title="刷新驗證碼"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {(loginError || captchaError) && (
               <motion.div 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 font-medium"
               >
-                <AlertCircle className="w-4 h-4" /> {loginError}
+                <AlertCircle className="w-4 h-4" /> {captchaError || loginError}
               </motion.div>
             )}
 
