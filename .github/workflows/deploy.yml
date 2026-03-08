@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 permissions:
-  contents: Read and write
+  contents: [ Read , write ]
 
 jobs:
   build-and-deploy:
