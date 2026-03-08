@@ -5,13 +5,9 @@ on:
     branches: [ main, master ]
 
 permissions:
-<<<<<<< HEAD
   contents: read
   pages: write
   id-token: write
-=======
-  contents:  write
->>>>>>> fa1e31cf52f2b650945c3a2ffc510a894cf8d3ec
 
 jobs:
   build:
