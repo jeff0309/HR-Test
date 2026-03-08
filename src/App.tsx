@@ -22,7 +22,8 @@ import {
   FileDown,
   CheckCircle2,
   BarChart3,
-  Copy
+  Copy,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Papa from 'papaparse';
@@ -48,6 +49,8 @@ export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [winnersHistory, setWinnersHistory] = useState<Person[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showSoxDashboard, setShowSoxDashboard] = useState(false);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
 
   const mockNames = [
     '陳小明', '林美玲', '張大華', '李淑芬', '王志強', 
@@ -375,25 +378,21 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 border-t border-[#141414]/5">
-                      <a
-                        href="./Ryan.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => setShowSnakeGame(true)}
                         className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 shadow-sm"
                       >
                         <Play className="w-4 h-4" /> 玩貪食蛇遊戲 (Snake Game)
-                      </a>
+                      </button>
                     </div>
 
                     <div className="pt-4 border-t border-[#141414]/5">
-                      <a
-                        href="./sox_dashboard.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => setShowSoxDashboard(true)}
                         className="w-full py-2 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl font-bold hover:bg-blue-100 transition-all flex items-center justify-center gap-2 shadow-sm"
                       >
                         <BarChart3 className="w-4 h-4" /> SOX Dashboard
-                      </a>
+                      </button>
                     </div>
 
                     <div className="pt-4 border-t border-[#141414]/5">
@@ -776,6 +775,92 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* SOX Dashboard Modal */}
+      <AnimatePresence>
+        {showSoxDashboard && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-[#141414]/60 backdrop-blur-sm"
+            onClick={() => setShowSoxDashboard(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white w-full h-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#141414]/10"
+            >
+              <div className="p-4 border-b border-[#141414]/10 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="text-white w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-bold tracking-tight">SOX Dashboard</h2>
+                </div>
+                <button
+                  onClick={() => setShowSoxDashboard(false)}
+                  className="p-2 hover:bg-[#F5F5F0] rounded-xl transition-all text-[#141414]/40 hover:text-[#141414]"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex-1 bg-[#F5F5F0]">
+                <iframe 
+                  src="./sox_dashboard.html" 
+                  className="w-full h-full border-none"
+                  title="SOX Dashboard"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Snake Game Modal */}
+      <AnimatePresence>
+        {showSnakeGame && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-[#141414]/60 backdrop-blur-sm"
+            onClick={() => setShowSnakeGame(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white w-full h-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#141414]/10"
+            >
+              <div className="p-4 border-b border-[#141414]/10 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                    <Play className="text-white w-5 h-5 fill-current" />
+                  </div>
+                  <h2 className="text-lg font-bold tracking-tight">Snake Game</h2>
+                </div>
+                <button
+                  onClick={() => setShowSnakeGame(false)}
+                  className="p-2 hover:bg-[#F5F5F0] rounded-xl transition-all text-[#141414]/40 hover:text-[#141414]"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex-1 bg-[#F5F5F0]">
+                <iframe 
+                  src="./Ryan.html" 
+                  className="w-full h-full border-none"
+                  title="Snake Game"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
