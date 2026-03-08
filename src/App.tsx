@@ -14,11 +14,14 @@ import {
   Play, 
   RotateCcw, 
   Settings2,
-  CheckCircle2,
-  Copy,
+  AlertCircle,
+  Lock,
+  LogIn,
+  LogOut,
   UserPlus,
   FileDown,
-  AlertCircle
+  CheckCircle2,
+  Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Papa from 'papaparse';
@@ -26,6 +29,8 @@ import confetti from 'canvas-confetti';
 import { Person, Group, AppTab } from './types';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState<AppTab>('list');
   const [people, setPeople] = useState<Person[]>([]);
   const [inputText, setInputText] = useState('');
@@ -142,6 +147,20 @@ export default function App() {
     document.body.removeChild(link);
   };
 
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const user = formData.get('username');
+    const pass = formData.get('password');
+
+    if (user === 'admin' && pass === 'admin123') {
+      setIsLoggedIn(true);
+      setLoginError('');
+    } else {
+      setLoginError('帳號或密碼錯誤');
+    }
+  };
+
   // Lucky Draw Logic
   const startDraw = () => {
     if (people.length === 0) return;
@@ -200,6 +219,70 @@ export default function App() {
     setGroups(newGroups);
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center p-6 font-sans">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-[#141414]/5 space-y-8"
+        >
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 bg-[#141414] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Lock className="text-white w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">HR Assistant</h1>
+            <p className="text-[#141414]/60 text-sm">請輸入後台管理憑證</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#141414]/40 ml-1">帳號</label>
+              <input 
+                name="username"
+                type="text" 
+                required
+                placeholder="Username"
+                className="w-full p-4 bg-[#F5F5F0] border-none rounded-xl focus:ring-2 focus:ring-[#141414]/10 transition-all outline-none"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#141414]/40 ml-1">密碼</label>
+              <input 
+                name="password"
+                type="password" 
+                required
+                placeholder="Password"
+                className="w-full p-4 bg-[#F5F5F0] border-none rounded-xl focus:ring-2 focus:ring-[#141414]/10 transition-all outline-none"
+              />
+            </div>
+
+            {loginError && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 font-medium"
+              >
+                <AlertCircle className="w-4 h-4" /> {loginError}
+              </motion.div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-4 bg-[#141414] text-white rounded-xl font-bold hover:bg-[#141414]/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#141414]/10"
+            >
+              <LogIn className="w-5 h-5" /> 登入後台
+            </button>
+          </form>
+
+          <p className="text-center text-[10px] text-[#141414]/20 uppercase tracking-widest font-bold">
+            Secure Access · Enterprise Edition
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F0] text-[#141414] font-sans">
       {/* Header */}
@@ -212,26 +295,37 @@ export default function App() {
             <h1 className="text-xl font-bold tracking-tight">HR Assistant</h1>
           </div>
           
-          <nav className="flex gap-1">
-            <TabButton 
-              active={activeTab === 'list'} 
-              onClick={() => setActiveTab('list')}
-              icon={<LayoutGrid className="w-4 h-4" />}
-              label="名單管理"
-            />
-            <TabButton 
-              active={activeTab === 'draw'} 
-              onClick={() => setActiveTab('draw')}
-              icon={<Trophy className="w-4 h-4" />}
-              label="獎品抽籤"
-            />
-            <TabButton 
-              active={activeTab === 'group'} 
-              onClick={() => setActiveTab('group')}
-              icon={<Users className="w-4 h-4" />}
-              label="自動分組"
-            />
-          </nav>
+          <div className="flex items-center gap-4">
+            <nav className="flex gap-1">
+              <TabButton 
+                active={activeTab === 'list'} 
+                onClick={() => setActiveTab('list')}
+                icon={<LayoutGrid className="w-4 h-4" />}
+                label="名單管理"
+              />
+              <TabButton 
+                active={activeTab === 'draw'} 
+                onClick={() => setActiveTab('draw')}
+                icon={<Trophy className="w-4 h-4" />}
+                label="獎品抽籤"
+              />
+              <TabButton 
+                active={activeTab === 'group'} 
+                onClick={() => setActiveTab('group')}
+                icon={<Users className="w-4 h-4" />}
+                label="自動分組"
+              />
+            </nav>
+            <div className="h-6 w-px bg-[#141414]/10 mx-1" />
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="p-2 text-[#141414]/40 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all flex items-center gap-2 text-sm font-medium"
+              title="登出"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="hidden sm:inline">登出</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -277,6 +371,17 @@ export default function App() {
                       >
                         <UserPlus className="w-4 h-4" /> 載入模擬名單
                       </button>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#141414]/5">
+                      <a
+                        href="./Ryan.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Play className="w-4 h-4" /> 玩貪食蛇遊戲 (Snake Game)
+                      </a>
                     </div>
 
                     <div className="pt-4 border-t border-[#141414]/5">
