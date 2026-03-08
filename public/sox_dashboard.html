@@ -1,0 +1,1763 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOX Weight Distortion Analysis Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: 'var(--brand-50)',
+                            500: 'var(--brand-500)',
+                            600: 'var(--brand-600)',
+                            900: 'var(--brand-900)',
+                        },
+                        base: 'var(--bg-base)',
+                        card: 'var(--bg-card)',
+                        input: 'var(--bg-input)',
+                        borderc: 'var(--borderc)',
+                        tmain: 'var(--text-main)',
+                        tmuted: 'var(--text-muted)',
+                        positive: 'var(--positive)',
+                        negative: 'var(--negative)'
+                    },
+                    fontFamily: {
+                        sans: ['var(--font-family)', 'sans-serif'],
+                        mono: ['var(--font-mono)', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root,
+        :root[data-theme="dark"] {
+            /* Default: Dark Mode */
+            --bg-base: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --borderc: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --brand-50: #f0fdfa;
+            --brand-500: #14b8a6;
+            --brand-600: #0d9488;
+            --brand-900: #134e4a;
+            --positive: #ef4444;
+            --negative: #10b981;
+            --font-family: 'Inter', -apple-system, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --border-radius: 0.5rem;
+        }
+
+        :root[data-theme="executive"] {
+            /* Executive Corporate Style */
+            --bg-base: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --borderc: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --brand-50: #eff6ff;
+            --brand-500: #2563eb;
+            --brand-600: #1d4ed8;
+            --brand-900: #1e3a8a;
+            --positive: #dc2626;
+            --negative: #16a34a;
+            --font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-mono: monospace;
+            --border-radius: 0px;
+        }
+
+        :root[data-theme="high-contrast"] {
+            /* High Contrast */
+            --bg-base: #000000;
+            --bg-card: #000000;
+            --bg-input: #000000;
+            --borderc: #ffffff;
+            --text-main: #ffffff;
+            --text-muted: #ffff00;
+            --brand-50: #000000;
+            --brand-500: #ff00ff;
+            --brand-600: #ff00ff;
+            --brand-900: #330033;
+            --positive: #ff0000;
+            --negative: #00ff00;
+            --font-family: Impact, "Arial Black", Arial, sans-serif;
+            --font-mono: monospace;
+            --border-radius: 0px;
+        }
+
+        :root[data-theme="apple"] {
+            /* Apple Style */
+            --bg-base: #f5f5f7;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --borderc: #d2d2d7;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --brand-50: #f5f5f7;
+            --brand-500: #0066cc;
+            --brand-600: #005bb5;
+            --brand-900: #e8f4fd;
+            --positive: #ff3b30;
+            --negative: #34c759;
+            --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: monospace;
+            --border-radius: 18px;
+        }
+
+        :root[data-theme="material"] {
+            /* Material Design */
+            --bg-base: #eeeeee;
+            --bg-card: #ffffff;
+            --bg-input: #f5f5f5;
+            --borderc: #e0e0e0;
+            --text-main: #212121;
+            --text-muted: #757575;
+            --brand-50: #e3f2fd;
+            --brand-500: #2196f3;
+            --brand-600: #1e88e5;
+            --brand-900: #0d47a1;
+            --positive: #f44336;
+            --negative: #4caf50;
+            --font-family: Roboto, "Segoe UI", sans-serif;
+            --font-mono: monospace;
+            --border-radius: 4px;
+        }
+
+        :root[data-theme="infographic"] {
+            /* Infographic */
+            --bg-base: #2a2a35;
+            --bg-card: #363645;
+            --bg-input: #2a2a35;
+            --borderc: #4a4a5e;
+            --text-main: #fcfcfc;
+            --text-muted: #a6a6b5;
+            --brand-50: #fff0f5;
+            --brand-500: #ff3366;
+            --brand-600: #e62e5c;
+            --brand-900: #4d0f1f;
+            --positive: #ff1744;
+            --negative: #00e676;
+            --font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+            --font-mono: Consolas, monospace;
+            --border-radius: 12px;
+        }
+
+        :root[data-theme="retro"] {
+            /* Retro / Vintage */
+            --bg-base: #f4ecd8;
+            --bg-card: #e8dcc4;
+            --bg-input: #dccdbe;
+            --borderc: #8b7355;
+            --text-main: #4a3c31;
+            --text-muted: #7a6352;
+            --brand-50: #f4ecd8;
+            --brand-500: #d46a6a;
+            --brand-600: #aa4a4a;
+            --brand-900: #552525;
+            --positive: #c62828;
+            --negative: #558b2f;
+            --font-family: "Courier New", Courier, monospace;
+            --font-mono: "Courier New", Courier, monospace;
+            --border-radius: 0px;
+        }
+
+        :root[data-theme="kawaii"] {
+            /* Cute Kawaii */
+            --bg-base: #fff0f5;
+            --bg-card: #ffffff;
+            --bg-input: #ffe4e1;
+            --borderc: #ffb6c1;
+            --text-main: #8a4b62;
+            --text-muted: #b07d90;
+            --brand-50: #fff0f5;
+            --brand-500: #ff69b4;
+            --brand-600: #ff1493;
+            --brand-900: #8a2be2;
+            --positive: #ff4500;
+            --negative: #3cb371;
+            --font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif;
+            --font-mono: monospace;
+            --border-radius: 24px;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        .rounded-lg,
+        .rounded-xl {
+            border-radius: var(--border-radius) !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--borderc);
+            border-radius: var(--border-radius);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .positive-text {
+            color: var(--positive);
+        }
+
+        .negative-text {
+            color: var(--negative);
+        }
+
+        /* Custom Calendar Styles */
+        #calendarPopup {
+            position: absolute;
+            z-index: 1000;
+            background: var(--bg-card);
+            border: 1px solid var(--borderc);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            width: 280px;
+            display: none;
+            user-select: none;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day-head {
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text-muted);
+            padding-bottom: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .calendar-day:hover {
+            background: var(--brand-50);
+            color: var(--brand-600);
+        }
+
+        .calendar-day.active {
+            background: var(--brand-600);
+            color: #fff;
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-muted);
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            border: 1px solid var(--brand-500);
+            font-weight: bold;
+        }
+
+        .calendar-day.disabled {
+            opacity: 0.15;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Loading overlay classes - Animated Ghost Cursor 🍑 */
+        #shinchanGhost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes buri-buri-move {
+            0% {
+                transform: translateX(-10px) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateX(10px) rotate(5deg);
+            }
+
+            100% {
+                transform: translateX(-10px) rotate(-5deg);
+            }
+        }
+
+        .shaking-butt {
+            transform-origin: center;
+            animation: buri-buri-move 0.4s infinite ease-in-out;
+        }
+
+        .loading-cursor {
+            cursor: none !important;
+        }
+
+        .loading-opacity {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .date-quick-btn {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--borderc);
+            background: var(--bg-input);
+            color: var(--brand-500);
+            transition: all 0.2s;
+        }
+
+        .date-quick-btn:hover {
+            background: var(--brand-500);
+            color: var(--text-main);
+            border-color: var(--brand-500);
+        }
+    </style>
+</head>
+
+<body class="bg-base text-tmain min-h-screen p-6">
+
+    <!-- Animated Shin-chan Ghost Cursor -->
+    <div id="shinchanGhost">
+        <svg viewBox="0 0 100 100">
+            <!-- Authentic Manga Shin-chan Buri Buri Dance 🍑✨ -->
+            <!-- Signature Head (turned back looking at you) -->
+            <circle cx="50" cy="35" r="22" fill="#fcc" />
+
+            <!-- Iconic Thick Eyebrows -->
+            <path d="M38 22 Q 42 20 46 22" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round" />
+            <path d="M54 22 Q 58 20 62 22" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round" />
+
+            <!-- Large White Eyes with Small Pupils -->
+            <ellipse cx="42" cy="30" rx="5" ry="6" fill="#fff" stroke="#000" stroke-width="0.5" />
+            <ellipse cx="58" cy="30" rx="5" ry="6" fill="#fff" stroke="#000" stroke-width="0.5" />
+            <circle cx="42" cy="30" r="1.5" fill="#000" /> <!-- pupil -->
+            <circle cx="58" cy="30" r="1.5" fill="#000" /> <!-- pupil -->
+
+            <!-- Soft Blush & Cheerful Mouth -->
+            <circle cx="36" cy="38" r="4" fill="#f99" opacity="0.6" />
+            <circle cx="64" cy="38" r="4" fill="#f99" opacity="0.6" />
+            <path d="M45 42 Q 50 46 55 42" stroke="#000" fill="none" stroke-width="1.5" stroke-linecap="round" />
+
+            <!-- Body & Shaking Butt -->
+            <path d="M35 55 Q 30 75 50 82 Q 70 75 65 55" fill="#f00" /> <!-- Red Shirt -->
+            <g class="shaking-butt">
+                <circle cx="42" cy="76" r="16" fill="#fcc" stroke="#f99" stroke-width="1" />
+                <circle cx="58" cy="76" r="16" fill="#fcc" stroke="#f99" stroke-width="1" />
+                <path d="M48 76 Q 50 82 52 76" stroke="#f66" fill="none" stroke-width="2" />
+            </g>
+            <rect x="35" y="82" width="30" height="10" fill="#ff0" /> <!-- Yellow Shorts -->
+        </svg>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header / 標題區塊 -->
+        <header
+            class="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-borderc">
+            <div>
+                <h1 class="text-3xl font-bold text-tmain tracking-tight" id="lblTitle">SOX Weight Distortion Analysis
+                </h1>
+                <p class="text-sm text-tmuted mt-1" id="lblSubtitle">Real-Time Comparison: Official vs True
+                    Market-Cap Weighted Index</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex flex-col md:flex-row gap-3 items-end md:items-center">
+                <!-- 語言切換選單 (Language Switcher) -->
+                <select id="langSelector"
+                    class="bg-input border border-borderc rounded-lg py-1.5 px-3 text-sm text-tmain focus:outline-none focus:border-brand-500">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                </select>
+                <!-- 策略切換選單 (Data Source Switcher) -->
+                <div class="flex items-center gap-2">
+                    <label for="sourceSelector" class="text-sm text-tmuted font-medium" id="lblSource">Source:</label>
+                    <select id="sourceSelector"
+                        class="bg-input border border-borderc rounded-lg py-1.5 px-3 text-sm text-brand-500 font-semibold focus:outline-none focus:border-brand-500 shadow-sm">
+                        <option value="yahoo">Yahoo Finance Live</option>
+                        <option value="mock">Static Mock Data</option>
+                    </select>
+                </div>
+                <!-- 主題切換 (Theme Switcher) -->
+                <div class="flex items-center gap-2 ml-2">
+                    <label for="themeSelector" class="text-sm text-tmuted font-medium" id="lblTheme">Theme:</label>
+                    <select id="themeSelector"
+                        class="bg-input border border-borderc rounded-lg py-1.5 px-3 text-sm text-brand-500 font-semibold focus:outline-none focus:border-brand-500 shadow-sm">
+                        <option value="dark">Dark Mode</option>
+                        <option value="executive">Executive</option>
+                        <option value="high-contrast">High Contrast</option>
+                        <option value="apple">Apple Style</option>
+                        <option value="material">Material Design</option>
+                        <option value="infographic">Infographic</option>
+                        <option value="retro">Retro / Vintage</option>
+                        <option value="kawaii">Cute Kawaii</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Column: Backtesting & Charts / 左側面板：回測與圖表 -->
+            <div class="lg:col-span-1 space-y-6">
+
+                <!-- Backtesting Panel / 回測面板 -->
+                <section class="bg-card rounded-xl p-5 border border-borderc shadow-lg">
+                    <h2 class="text-xl font-semibold text-tmain mb-4" id="lblBacktestTitle">Daily Return Backtesting
+                    </h2>
+                    <form id="backtestForm" class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label for="dateDisplay" class="block text-sm font-medium text-tmuted"
+                                    id="lblSelectDate">Select Date</label>
+                                <div class="flex gap-1" id="quickDates">
+                                    <button type="button" class="date-quick-btn" onclick="setQuickDate('today')"
+                                        id="btnToday">Today</button>
+                                    <button type="button" class="date-quick-btn" onclick="setQuickDate('yesterday')"
+                                        id="btnYesterday">Yest</button>
+                                    <button type="button" class="date-quick-btn" onclick="setQuickDate('friday')"
+                                        id="btnFriday">Fri</button>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <input type="text" id="dateDisplay" readonly
+                                    class="w-full bg-input border border-borderc rounded-lg px-3 py-2 text-tmain cursor-pointer focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
+                                    placeholder="YYYY-MM-DD">
+                                <input type="hidden" id="simulateDate" name="simulateDate" required>
+
+                                <!-- Custom Calendar Popup -->
+                                <div id="calendarPopup" class="shadow-2xl">
+                                    <div class="calendar-header">
+                                        <button type="button" class="p-1 hover:text-brand-500"
+                                            onclick="changeMonth(-1)">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 19l-7-7 7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <span id="calendarMonthYear" class="font-bold text-sm text-tmain"></span>
+                                        <button type="button" class="p-1 hover:text-brand-500" onclick="changeMonth(1)">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="calendar-grid" id="calendarGrid">
+                                        <!-- Days rendered by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="btnCalculate"
+                            class="w-full bg-brand-600 hover:bg-brand-500 text-tmain font-medium py-2 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                            <span id="lblBtnCalculate">Calculate Distortion</span>
+                        </button>
+                    </form>
+
+                    <!-- Results Panel / 結果顯示區 -->
+                    <div id="resultsPanel" class="mt-6 space-y-3 hidden">
+                        <div class="flex justify-between items-center bg-input p-3 rounded-lg border border-borderc">
+                            <span class="text-sm text-tmuted" id="lblResOfficial">Official SOX Return</span>
+                            <span id="resOfficial" class="font-mono font-bold">--</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-input p-3 rounded-lg border border-borderc">
+                            <span class="text-sm text-tmuted" id="lblResTrue">True M-Cap Return</span>
+                            <span id="resTrue" class="font-mono font-bold">--</span>
+                        </div>
+                        <div
+                            class="flex justify-between items-center bg-brand-900 p-3 rounded-lg border border-brand-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]">
+                            <span class="text-sm text-brand-50 mt-1 font-semibold" id="lblResSpread">Distortion
+                                Spread</span>
+                            <span id="resSpread" class="font-mono font-bold text-lg text-tmain">--</span>
+                        </div>
+                        <!-- Actual SOX Index Info -->
+                        <div id="soxIndexCard" class="bg-card p-3 rounded-lg border border-borderc space-y-2">
+                            <div class="flex justify-between border-b border-borderc pb-1 mb-1">
+                                <span class="text-xs font-bold text-tmain" id="lblActualIndexHeader">Actual SOX Index
+                                    (^SOX)</span>
+                                <span id="soxPrice" class="text-xs font-mono font-bold text-tmain">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-xs text-tmuted" id="lblSoxChange">Actual Change</span>
+                                <span id="soxChange" class="text-xs font-mono font-bold">--</span>
+                            </div>
+                            <div class="flex justify-between pt-1 border-t border-borderc/50 mt-1">
+                                <span class="text-[10px] text-tmuted uppercase tracking-wider" id="lblDataDate">Data
+                                    Date:</span>
+                                <span id="resDataDate" class="text-[10px] font-mono font-bold text-tmuted">--</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-[9px] text-tmuted uppercase tracking-wider"
+                                    id="marketStatusLabel">Market Status:</span>
+                                <span id="marketStatus"
+                                    class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-input border border-borderc">OPEN</span>
+                            </div>
+                            <div id="weekendNote" class="text-[9px] text-brand-500/80 italic text-right hidden">
+                                * Weekend/Holiday: Using latest market close.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Chart Panel / 圖表面板 -->
+                <section class="bg-card rounded-xl p-5 border border-borderc shadow-lg">
+                    <h2 class="text-md font-semibold text-tmain mb-4" id="lblChartTitle">Top 10 Weight Comparison</h2>
+                    <div class="relative h-64 w-full">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Right Column: Constituents Table / 右側面板：成分股表格 -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Data Table Panel / 表格面板 -->
+                <section
+                    class="bg-card rounded-xl border border-borderc shadow-lg overflow-hidden flex flex-col h-[calc(100vh-8rem)]">
+                    <div class="p-5 border-b border-borderc flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-xl font-semibold text-tmain" id="lblTableTitle">Index Constituents (30)</h2>
+                            <span class="text-sm font-semibold px-3 py-1 bg-input rounded-md border border-borderc"
+                                id="lblIndexChange" style="display:none"></span>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded bg-borderc text-tmain border border-borderc"
+                            id="lblLiveSim">Live Simulation</span>
+                    </div>
+                    <!-- 表格滾動區 (Table wrapper) -->
+                    <div class="overflow-y-auto flex-1 p-0 relative" id="tableContainer">
+                        <table class="w-full text-left text-sm text-tmuted">
+                            <thead class="text-xs uppercase bg-input text-tmuted sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('ticker')" id="colTicker">Ticker</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('companyName')" id="colCompany">Company Name</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('livePrice')" id="colPrice">Last Close</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('dailyChangePct')" id="colChange">Day Change</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('officialWeight')" id="colOfficial">Official Wgt
+                                    </th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('trueWeight')" id="colTrue">True Wgt</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('spread')" id="colSpread">Spread</th>
+                                    <th scope="col"
+                                        class="px-3 py-4 font-medium text-right cursor-pointer hover:text-brand-500 transition-colors"
+                                        onclick="handleSort('mag')" id="colMag">Wgt Mag.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="constituentsTableBody" class="divide-y divide-borderc">
+                                <!-- Data injected via JS / 資料將由 JS 動態注入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 腳本區域 (Scripts) -->
+    <script>
+        // @author Jeff, Generated: 2026-02-28, Rewritten to fix UTF-8 corruption and UI states.
+
+        const log = {
+            info: (msg, ...args) => console.log(`%c[INFO] [SoxDashboard] - ${msg}`, "color: #3b82f6; font-weight: bold", ...args),
+            debug: (msg, ...args) => console.debug(`%c[DEBUG] [SoxDashboard] - ${msg}`, "color: #8b5cf6", ...args),
+            warn: (msg, ...args) => console.warn(`%c[WARN] [SoxDashboard] - ${msg}`, "color: #f59e0b", ...args),
+            error: (msg, ...args) => console.error(`%c[ERROR] [SoxDashboard] - ${msg}`, "color: #ef4444; font-weight: bold", ...args),
+            trace: (msg, ...args) => console.log(`%c[TRACE] [SoxDashboard] - ${msg}`, "color: #64748b", ...args),
+        };
+
+        log.info("開始初始化 SOX 權重失真分析儀表板 (Initializing SOX Dashboard)");
+
+        // =============================================================
+        // I18n Multi-Language Support / 多語系支援
+        // =============================================================
+        const translations = {
+            en: {
+                title: "SOX Weight Distortion Analysis",
+                subtitle: "Real-Time Comparison: Official vs True Market-Cap Weighted Index",
+                lblSource: "Source:",
+                backtestTitle: "Daily Return Backtesting",
+                selectDate: "Select Date",
+                btnCalculate: "Calculate Distortion",
+                btnCalculating: "Calculating...",
+                resOfficial: "Theoretical Return (Latest Official Weight)",
+                resTrue: "True M-Cap Return",
+                resSpread: "Distortion Spread",
+                chartTitle: "Top 10 Weight Comparison",
+                tableTitle: "Index Constituents (30)",
+                titleMagnification: "Magnification (True/Official)",
+                liveSim: "Strategy:",
+                colTicker: "Ticker",
+                colCompany: "Company",
+                colPrice: "Last Close",
+                colChange: "Daily Chg",
+                colOfficial: "Off. Wgt (%)",
+                colTrue: "True Wgt (%)",
+                colSpread: "Spread (pts)",
+                colMag: "Wgt Mag.",
+                ttTicker: "Stock Ticker Symbol",
+                ttCompany: "Company Name",
+                ttPrice: "Last Market Closing Price (USD)",
+                ttChange: "Daily Price Change and Percentage",
+                ttOfficial: "Official Index Capped Weight",
+                ttTrue: "Actual Market-Cap Weight (Uncapped)",
+                ttSpread: "Weight Distortion (True - Official)",
+                todayChange: "Today's Change:",
+                lblSoxChange: "Actual SOX Change:",
+                chartLabelOfficial: "Official Weight (%)",
+                chartLabelTrue: "True M-Cap Weight (%)",
+                lblTheme: "Theme:",
+                lblDataDate: "Data Date (US ET):",
+                lblMktStatus: "Market Status:",
+                mktOpen: "MARKET OPEN",
+                mktClosed: "MARKET CLOSED",
+                theme_dark: "Dark Mode",
+                theme_executive: "Executive",
+                theme_hc: "High Contrast",
+                theme_apple: "Apple Style",
+                theme_material: "Material Design",
+                theme_info: "Infographic",
+                theme_retro: "Retro / Vintage",
+                theme_kawaii: "Cute Kawaii",
+                loadingData: "Fetching market data...",
+                btnToday: "Today",
+                btnYesterday: "Yest",
+                btnFriday: "Fri"
+            },
+            zh: {
+                title: "SOX 指數權重失真分析",
+                subtitle: "即時比較：官方上限權重 vs 真實市值權重",
+                lblSource: "資料來源：",
+                backtestTitle: "每日回報率回測模擬",
+                selectDate: "選擇回測日期",
+                btnCalculate: "計算失真利差",
+                btnCalculating: "計算中...",
+                chartTitle: "十大成分股權重比較 (Top 10)",
+                tableTitle: "指數成分股清單 (共 30 檔)",
+                titleMagnification: "權重放大倍率 (真實市值/官方限縮)",
+                liveSim: "執行策略：",
+                colTicker: "股票代碼",
+                colCompany: "公司名稱",
+                colPrice: "當日收盤價",
+                colChange: "漲跌幅",
+                colOfficial: "官方權重 (%)",
+                colTrue: "真實權重 (%)",
+                colSpread: "權重利差 (pts)",
+                colMag: "放大倍率",
+                ttTicker: "股票代碼",
+                ttCompany: "公司名稱",
+                ttPrice: "最新收盤價 (美金)",
+                ttChange: "當日漲跌金額與百分比",
+                ttOfficial: "官方限縮後的指數權重",
+                ttTrue: "原始市值計算的權重 (未限縮)",
+                ttSpread: "權重失真偏離值 (真實 - 官方)",
+                todayChange: "理論回報 (官方權重)：",
+                resOfficial: "理論回報 (最新官方權重)",
+                resTrue: "真實市值回報 (未限縮)",
+                resSpread: "市值偏離值 (Spread)",
+                actualSoxHeader: "實際 SOX 指數 (^SOX)",
+                lblSoxChange: "實際費半今日漲跌：",
+                chartLabelOfficial: "官方權重 (%)",
+                chartLabelTrue: "真實市值權重 (%)",
+                lblTheme: "佈景主題：",
+                lblDataDate: "數據有效日期 (US ET):",
+                lblMktStatus: "市場交易狀態:",
+                mktOpen: "開市中 (MARKET OPEN)",
+                mktClosed: "已休市 (MARKET CLOSED)",
+                theme_dark: "暗黑模式 (Dark Mode)",
+                theme_executive: "專業高階 (Executive)",
+                theme_hc: "高對比 (High Contrast)",
+                theme_apple: "蘋果風 (Apple Style)",
+                theme_material: "質感設計 (Material)",
+                theme_info: "資訊圖表 (Infographic)",
+                theme_retro: "復古懷舊 (Retro)",
+                theme_kawaii: "可愛風 (Kawaii)",
+                loadingData: "正在為您查詢市場資料...",
+                btnToday: "今日",
+                btnYesterday: "昨日",
+                btnFriday: "上週五"
+            }
+        };
+
+        let currentLang = 'zh';
+
+        let hasLoadedData = false;
+
+        /**
+         * 切換介面語言 (Switch user interface language)
+         */
+        function updateLanguage(lang) {
+            log.info(`切換語系至 / Switching language to: ${lang}`);
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('lblTitle').innerText = t.title;
+            document.getElementById('lblSubtitle').innerText = t.subtitle;
+            document.getElementById('lblSource').innerText = t.lblSource;
+            document.getElementById('lblBacktestTitle').innerText = t.backtestTitle;
+            document.getElementById('lblSelectDate').innerText = t.selectDate;
+            document.getElementById('lblBtnCalculate').innerText = t.btnCalculate;
+            document.getElementById('lblResOfficial').innerText = t.resOfficial;
+            document.getElementById('lblResTrue').innerText = t.resTrue;
+            document.getElementById('lblResSpread').innerText = t.resSpread;
+            document.getElementById('lblChartTitle').innerText = t.chartTitle;
+            document.getElementById('lblTableTitle').innerText = t.tableTitle;
+
+            // New label for Actual Index Card
+            if (document.getElementById('lblActualIndexHeader')) {
+                document.getElementById('lblActualIndexHeader').innerText = t.actualSoxHeader || "Actual SOX Index (^SOX)";
+            }
+            if (document.getElementById('lblSoxChange')) {
+                document.getElementById('lblSoxChange').innerText = t.lblSoxChange;
+            }
+
+            const activeStrategyName = document.getElementById('sourceSelector').options[document.getElementById('sourceSelector').selectedIndex].text;
+            document.getElementById('lblLiveSim').innerText = `${t.liveSim} ${activeStrategyName}`;
+
+            document.getElementById('colTicker').innerText = t.colTicker;
+            document.getElementById('colCompany').innerText = t.colCompany;
+            document.getElementById('colPrice').innerText = t.colPrice;
+            document.getElementById('colChange').innerText = t.colChange;
+            document.getElementById('colOfficial').innerText = t.colOfficial;
+            document.getElementById('colTrue').innerText = t.colTrue;
+            document.getElementById('colSpread').innerText = t.colSpread;
+            document.getElementById('colMag').innerText = t.colMag;
+            document.getElementById('lblSoxChange').innerText = t.lblSoxChange;
+
+            document.getElementById('lblTheme').innerText = t.lblTheme;
+            if (document.getElementById('lblDataDate')) {
+                document.getElementById('lblDataDate').innerText = t.lblDataDate;
+            }
+            if (document.getElementById('marketStatusLabel')) {
+                document.getElementById('marketStatusLabel').innerText = t.lblMktStatus;
+            }
+
+            // Update Quick Select Buttons
+            if (document.getElementById('btnToday')) document.getElementById('btnToday').innerText = t.btnToday;
+            if (document.getElementById('btnYesterday')) document.getElementById('btnYesterday').innerText = t.btnYesterday;
+            if (document.getElementById('btnFriday')) document.getElementById('btnFriday').innerText = t.btnFriday;
+            const ts = document.getElementById('themeSelector');
+            ts.options[0].text = t.theme_dark;
+            ts.options[1].text = t.theme_executive;
+            ts.options[2].text = t.theme_hc;
+            ts.options[3].text = t.theme_apple;
+            ts.options[4].text = t.theme_material;
+            ts.options[5].text = t.theme_info;
+            ts.options[6].text = t.theme_retro;
+            ts.options[7].text = t.theme_kawaii;
+
+            if (globalConstituents && globalConstituents.length > 0) {
+                renderChart(globalConstituents);
+                renderTable(globalConstituents);
+            }
+        }
+
+        // =============================================================
+        // Strategy Pattern for Market Data Provider / 資料提供者的策略模式
+        // =============================================================
+        class MarketDataProvider {
+            async fetchConstituents() { throw new Error("Method not implemented"); }
+            async fetchDailyReturn(ticker, date) { throw new Error("Method not implemented"); }
+            async fetchOfficialWeightsFromSOXX() { return false; }
+        }
+
+        class MockYahooMarketDataStrategy extends MarketDataProvider {
+            constructor() {
+                super();
+                this.seedTickers = [
+                    { t: "NVDA", n: "NVIDIA Corporation" }, { t: "TSM", n: "Taiwan Semiconductor" },
+                    { t: "AVGO", n: "Broadcom Inc." }, { t: "ASML", n: "ASML Holding N.V." },
+                    { t: "AMD", n: "Advanced Micro Devices" }, { t: "QCOM", n: "Qualcomm Inc." },
+                    { t: "TXN", n: "Texas Instruments" }, { t: "AMAT", n: "Applied Materials" },
+                    { t: "INTC", n: "Intel Corporation" }, { t: "MU", n: "Micron Technology" },
+                    { t: "LRCX", n: "Lam Research" }, { t: "ADI", n: "Analog Devices" },
+                    { t: "KLAC", n: "KLA Corporation" }, { t: "NXPI", n: "NXP Semiconductors" },
+                    { t: "MRVL", n: "Marvell Technology" }, { t: "SNPS", n: "Synopsys Inc." },
+                    { t: "CDNS", n: "Cadence Design Systems" }, { t: "ON", n: "ON Semiconductor" },
+                    { t: "MCHP", n: "Microchip Technology" }, { t: "ARM", n: "Arm Holdings" },
+                    { t: "WDC", n: "Western Digital" }, { t: "SWKS", n: "Skyworks Solutions" },
+                    { t: "MPWR", n: "Monolithic Power" }, { t: "TER", n: "Teradyne Inc." },
+                    { t: "QRVO", n: "Qorvo Inc." }, { t: "WOLF", n: "Wolfspeed Inc." },
+                    { t: "LSCC", n: "Lattice Semiconductor" }, { t: "RMBS", n: "Rambus Inc." },
+                    { t: "ALGM", n: "Allegro MicroSystems" }, { t: "SLAB", n: "Silicon Labs" }
+                ];
+            }
+
+            async fetchConstituents() {
+                const constituents = [];
+                let totalTrueCap = 0;
+                let totalOfficialWeight = 0;
+
+                for (let i = 0; i < this.seedTickers.length; i++) {
+                    const stock = this.seedTickers[i];
+                    let trueCap, officialW, mockPrice, mockChangePct;
+
+                    if (stock.t === "NVDA") {
+                        mockPrice = 177.19;
+                        mockChangePct = -0.0416;
+                        officialW = 0.09579;
+                        // To get trueWeight around 38.344%, we'll set its trueCap relative to a base
+                        trueCap = 1000000;
+                    } else {
+                        mockPrice = 100 + (i * 5);
+                        mockChangePct = (i % 2 === 0 ? 0.02 : -0.015);
+                        officialW = i < 5 ? 0.07 : (0.6 / 25) * (1 - (i * 0.02));
+                        trueCap = 500000 / (i + 1);
+                    }
+
+                    constituents.push({
+                        ticker: stock.t,
+                        companyName: stock.n,
+                        livePrice: mockPrice,
+                        dailyChangeAmt: mockPrice * mockChangePct,
+                        dailyChangePct: mockChangePct,
+                        trueCap: trueCap,
+                        officialWeight: officialW
+                    });
+
+                    totalTrueCap += trueCap;
+                    totalOfficialWeight += officialW;
+                }
+
+                // Adjust NVDA trueCap to hit the target ~38.344% trueWeight
+                const nvda = constituents.find(c => c.ticker === "NVDA");
+                const otherCap = totalTrueCap - nvda.trueCap;
+                // Target: nvdaCap / (nvdaCap + otherCap) = 0.38344
+                // nvdaCap = 0.38344 * (nvdaCap + otherCap)
+                // nvdaCap * (1 - 0.38344) = 0.38344 * otherCap
+                nvda.trueCap = (0.38344 * otherCap) / (1 - 0.38344);
+                totalTrueCap = otherCap + nvda.trueCap;
+
+                constituents.forEach(c => {
+                    c.trueWeight = c.trueCap / totalTrueCap;
+                    c.officialWeight = c.officialWeight / totalOfficialWeight;
+                    c.spread = c.trueWeight - c.officialWeight;
+                    c.mag = c.trueWeight > 0 ? c.officialWeight / c.trueWeight : 1.0;
+                });
+
+                return constituents;
+            }
+
+            async fetchDailyReturn(ticker, date) {
+                if (ticker === "^SOX") {
+                    return { price: 5000.00, change: -50.2, ret: -0.01, date: "2026-02-27" };
+                }
+                const isNvda = ticker === "NVDA";
+                return {
+                    price: isNvda ? 177.19 : 100,
+                    change: isNvda ? -7.70 : -2.00,
+                    ret: isNvda ? -0.0416 : -0.02,
+                    date: "2026-02-27"
+                };
+            }
+        }
+
+        class ApiMarketDataStrategy extends MarketDataProvider {
+            constructor() {
+                super();
+                this.proxies = [
+                    "https://api.allorigins.win/get?url=",
+                    "https://corsproxy.io/?",
+                    "https://thingproxy.freeboard.io/fetch/"
+                ];
+                this.stocks = {
+                    "NVDA": { n: "NVIDIA Corporation", shares: 24.5 }, "TSM": { n: "Taiwan Semiconductor", shares: 5.18 },
+                    "AVGO": { n: "Broadcom Inc.", shares: 4.6 }, "ASML": { n: "ASML Holding N.V.", shares: 0.39 },
+                    "AMD": { n: "Advanced Micro Devices", shares: 1.6 }, "QCOM": { n: "Qualcomm Inc.", shares: 1.1 },
+                    "TXN": { n: "Texas Instruments", shares: 0.9 }, "AMAT": { n: "Applied Materials", shares: 0.8 },
+                    "INTC": { n: "Intel Corporation", shares: 4.2 }, "MU": { n: "Micron Technology", shares: 1.1 },
+                    "LRCX": { n: "Lam Research", shares: 1.3 }, "ADI": { n: "Analog Devices", shares: 0.5 },
+                    "KLAC": { n: "KLA Corporation", shares: 0.13 }, "NXPI": { n: "NXP Semiconductors", shares: 0.25 },
+                    "MRVL": { n: "Marvell Technology", shares: 0.86 }, "SNPS": { n: "Synopsys Inc.", shares: 0.15 },
+                    "CDNS": { n: "Cadence Design Systems", shares: 0.27 }, "ON": { n: "ON Semiconductor", shares: 0.43 },
+                    "MCHP": { n: "Microchip Technology", shares: 0.53 }, "ARM": { n: "Arm Holdings", shares: 1.0 },
+                    "WDC": { n: "Western Digital", shares: 0.33 }, "SWKS": { n: "Skyworks Solutions", shares: 0.16 },
+                    "MPWR": { n: "Monolithic Power", shares: 0.04 }, "TER": { n: "Teradyne Inc.", shares: 0.15 },
+                    "QRVO": { n: "Qorvo Inc.", shares: 0.09 }, "WOLF": { n: "Wolfspeed Inc.", shares: 0.12 },
+                    "LSCC": { n: "Lattice Semiconductor", shares: 0.13 }, "RMBS": { n: "Rambus Inc.", shares: 0.10 },
+                    "ALGM": { n: "Allegro MicroSystems", shares: 0.19 }, "SLAB": { n: "Silicon Labs", shares: 0.03 }
+                };
+
+                // Real Nasdaq SOX Methodology: 
+                // Top 5 capped at 8%, next 25 at 4% but usually market-cap scaled.
+                // These are approximate weights for a typical rebalance period.
+                this.officialWeights = {
+                    "NVDA": 0.091, "TSM": 0.088, "AVGO": 0.085, "AMD": 0.078, "QCOM": 0.075,
+                    "ASML": 0.045, "AMAT": 0.042, "TXN": 0.041, "INTC": 0.038, "MU": 0.035,
+                    "LRCX": 0.032, "ADI": 0.030, "KLAC": 0.028, "NXPI": 0.025, "MRVL": 0.022,
+                    "SNPS": 0.020, "CDNS": 0.019, "MCHP": 0.018, "ON": 0.017, "ARM": 0.016,
+                    "MPWR": 0.015, "WDC": 0.014, "TER": 0.013, "SWKS": 0.012, "QRVO": 0.011,
+                    "LSCC": 0.010, "RMBS": 0.009, "ALGM": 0.008, "WOLF": 0.007, "SLAB": 0.006
+                };
+
+                const tickers = Object.keys(this.stocks);
+                let currentSum = tickers.reduce((acc, t) => acc + (this.officialWeights[t] || 0), 0);
+                tickers.forEach(t => this.officialWeights[t] = (this.officialWeights[t] || 0) / currentSum);
+            }
+
+            _toEpoch(dateStr) {
+                // US markets close at 16:00 ET. 
+                // 23:00 UTC is always after close (either 18:00 or 19:00 ET).
+                return Math.floor(new Date(dateStr + 'T23:00:00Z').getTime() / 1000);
+            }
+
+            async fetchOfficialWeightsFromSOXX() {
+                log.info("Attempting to fetch dynamic official weights from SOXX holdings...");
+                try {
+                    // This is a known URL for iShares SOXX holdings. Proxies might struggle but we can try.
+                    // Fallback is to use Yahoo's ETF holdings if possible, or just re-cap based on current data.
+                    const isharesUrl = `https://www.ishares.com/us/products/239705/ishares-phlx-semiconductor-etf/1467271812596.ajax?fileType=csv&fileName=SOXX_holdings&dataType=fund`;
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(isharesUrl)}`;
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+
+                    if (data && data.contents) {
+                        const csv = data.contents;
+                        const lines = csv.split('\n');
+                        const newWeights = {};
+                        let foundHeader = false;
+
+                        for (let line of lines) {
+                            if (line.includes("Ticker") && line.includes("Weight")) {
+                                foundHeader = true;
+                                continue;
+                            }
+                            if (foundHeader && line.trim()) {
+                                const parts = line.split(',');
+                                if (parts.length > 3) {
+                                    const ticker = parts[0].replace(/"/g, '').trim();
+                                    const weight = parseFloat(parts[2].replace(/"/g, ''));
+                                    if (!isNaN(weight)) {
+                                        newWeights[ticker] = weight / 100;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (Object.keys(newWeights).length > 20) {
+                            log.info("Successfully fetched dynamic weights for SOXX.");
+                            this.officialWeights = newWeights;
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    log.warn("Failed to fetch SOXX CSV, falling back to methodology-based capping.", e);
+                }
+
+                // Fallback: Methodology re-cap (Nasdaq-100/SOX style)
+                // We'll do this in reloadData since it requires current market caps
+                return false;
+            }
+
+            async fetchConstituents(dateStr = null) {
+                const isToday = !dateStr || dateStr === new Date().toISOString().split('T')[0];
+                if (isToday) {
+                    return this._fetchConstituentsBatch();
+                } else {
+                    return this._fetchConstituentsHistorical(dateStr);
+                }
+            }
+
+            async _fetchConstituentsBatch() {
+                const tickers = Object.keys(this.stocks);
+                const allSymbols = [...tickers, "^SOX"].join(",");
+
+                try {
+                    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(allSymbols)}`;
+
+                    // Use proxy rotation with retry logic
+                    let response;
+                    let lastError;
+                    for (let i = 0; i < this.proxies.length; i++) {
+                        try {
+                            const url = `${this.proxies[i]}${encodeURIComponent(yahooUrl)}&_cb=${Date.now()}`;
+                            response = await fetch(url);
+                            if (response.ok) break;
+                        } catch (err) {
+                            lastError = err;
+                        }
+                    }
+                    if (!response || !response.ok) throw lastError || new Error("All proxies failed");
+
+                    const proxyData = await response.json();
+                    let data;
+                    if (proxyData && proxyData.contents) {
+                        // AllOrigins/CorsProxy format
+                        data = typeof proxyData.contents === 'string' ? JSON.parse(proxyData.contents) : proxyData.contents;
+                    } else {
+                        // Direct or other proxy format
+                        data = proxyData;
+                    }
+
+                    if (!data || !data.quoteResponse || !data.quoteResponse.result) {
+                        throw new Error("Invalid quote response format");
+                    }
+
+                    const quotes = {};
+                    data.quoteResponse.result.forEach(q => quotes[q.symbol] = q);
+
+                    const constituents = tickers.map(ticker => {
+                        const q = quotes[ticker] || {};
+                        const price = q.regularMarketPrice || 0;
+                        const changeAmt = q.regularMarketChange || 0;
+                        const changePct = (q.regularMarketChangePercent || 0) / 100;
+
+                        return {
+                            ticker: ticker,
+                            companyName: this.stocks[ticker].n,
+                            livePrice: price,
+                            dailyChangeAmt: changeAmt,
+                            dailyChangePct: changePct,
+                            trueCap: this.stocks[ticker].shares * price,
+                            officialWeight: this.officialWeights[ticker] || 0
+                        };
+                    });
+
+                    const totalTrueCap = constituents.reduce((acc, c) => acc + c.trueCap, 0);
+                    constituents.forEach(c => {
+                        c.trueWeight = totalTrueCap > 0 ? c.trueCap / totalTrueCap : 0;
+                        c.spread = c.trueWeight - c.officialWeight;
+                        c.mag = c.trueWeight > 0 ? c.officialWeight / c.trueWeight : 1.0;
+                    });
+
+                    // Store ^SOX result in a temporary place or just use it if needed
+                    this.latestSox = quotes["^SOX"] ? {
+                        price: quotes["^SOX"].regularMarketPrice,
+                        change: quotes["^SOX"].regularMarketChange,
+                        ret: (quotes["^SOX"].regularMarketChangePercent || 0) / 100,
+                        date: new Date().toISOString().split('T')[0]
+                    } : null;
+
+                    constituents.sort((a, b) => b.trueWeight - a.trueWeight);
+                    return constituents;
+
+                } catch (err) {
+                    log.error("Batch fetch failed, attempting stable fallback:", err);
+                    // Fallback to the historical method which uses the more stable /chart endpoint
+                    // We use today's date to get 'live' data through the chart endpoint
+                    const today = new Date().toISOString().split('T')[0];
+                    return this._fetchConstituentsHistorical(today);
+                }
+            }
+
+            async _fetchConstituentsHistorical(dateStr) {
+                const tickers = Object.keys(this.stocks);
+                const promises = tickers.map(async (ticker) => {
+                    try {
+                        const result = await this.fetchDailyReturn(ticker, dateStr);
+                        return {
+                            ticker: ticker,
+                            companyName: this.stocks[ticker].n,
+                            livePrice: result.price,
+                            dailyChangeAmt: result.change,
+                            dailyChangePct: result.ret,
+                            trueCap: this.stocks[ticker].shares * result.price,
+                            officialWeight: this.officialWeights[ticker]
+                        };
+                    } catch (err) {
+                        log.warn(`Stable Fallback - API Error for ${ticker}:`, err);
+                        return {
+                            ticker: ticker,
+                            companyName: this.stocks[ticker].n,
+                            livePrice: 100,
+                            dailyChangeAmt: 0,
+                            dailyChangePct: 0,
+                            trueCap: this.stocks[ticker].shares * 100,
+                            officialWeight: this.officialWeights[ticker]
+                        };
+                    }
+                });
+
+                const constituents = await Promise.all(promises);
+
+                const totalTrueCap = constituents.reduce((acc, c) => acc + c.trueCap, 0);
+                constituents.forEach(c => {
+                    c.trueWeight = totalTrueCap > 0 ? c.trueCap / totalTrueCap : 0;
+                    c.spread = c.trueWeight - c.officialWeight;
+                    c.mag = c.trueWeight > 0 ? c.officialWeight / c.trueWeight : 1.0;
+                });
+                constituents.sort((a, b) => b.trueWeight - a.trueWeight);
+                return constituents;
+            }
+
+            async fetchDailyReturn(ticker, dateStr, retryCount = 0) {
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+                try {
+                    let yahooUrl;
+                    if (isToday) {
+                        yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+                    } else {
+                        // For historical dates, get enough data to find the target day
+                        const target = new Date(dateStr + 'T12:00:00Z');
+                        const epoch = Math.floor(target.getTime() / 1000);
+                        yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${epoch - 864000}&period2=${epoch + 172800}&interval=1d`;
+                    }
+
+                    const proxyBase = this.proxies[retryCount % this.proxies.length];
+                    const url = `${proxyBase}${encodeURIComponent(yahooUrl)}&_cb=${Date.now()}`;
+
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const rawData = await response.json();
+                    const contents = rawData.contents || rawData; // handle different proxy formats
+                    const data = typeof contents === 'string' ? JSON.parse(contents) : contents;
+
+                    if (!data.chart || !data.chart.result) throw new Error("No data results");
+
+                    const res = data.chart.result[0];
+                    const meta = res.meta;
+                    const timestamps = res.timestamp || [];
+                    const indicators = res.indicators.quote[0];
+                    const closes = indicators.close || [];
+
+                    let price = meta.regularMarketPrice;
+                    let prevClose = meta.chartPreviousClose;
+
+                    if (!isToday && timestamps.length > 0) {
+                        // Target exactly 4:00 PM ET on the requested day
+                        const targetDate = new Date(dateStr + 'T16:00:00-05:00');
+                        const targetEpoch = Math.floor(targetDate.getTime() / 1000);
+
+                        let targetIdx = -1;
+                        let minDiff = Infinity;
+
+                        for (let i = 0; i < timestamps.length; i++) {
+                            const diff = Math.abs(timestamps[i] - targetEpoch);
+                            if (diff < minDiff && diff < 86400) {
+                                minDiff = diff;
+                                targetIdx = i;
+                            }
+                        }
+
+                        if (targetIdx !== -1) {
+                            price = closes[targetIdx] || price;
+                            // Find the non-null close before this one
+                            let prevIdx = -1;
+                            for (let j = targetIdx - 1; j >= 0; j--) {
+                                if (closes[j] != null) {
+                                    prevIdx = j;
+                                    break;
+                                }
+                            }
+                            prevClose = prevIdx !== -1 ? closes[prevIdx] : (meta.previousClose || price);
+                        }
+                    }
+
+                    if (!price || isNaN(price) || price === 0) {
+                        throw new Error("Zero/Invalid price");
+                    }
+
+                    const ret = prevClose !== 0 ? (price - prevClose) / prevClose : 0;
+                    return { ret: ret, price: price, change: price - prevClose, date: isToday ? new Date().toISOString().split('T')[0] : dateStr };
+                } catch (e) {
+                    if (retryCount < 4) {
+                        const delay = 300 * (retryCount + 1);
+                        await new Promise(r => setTimeout(r, delay));
+                        return await this.fetchDailyReturn(ticker, dateStr, retryCount + 1);
+                    }
+                    log.error(`Fetch ${ticker} failed:`, e);
+                    return { ret: 0, price: 0, change: 0 };
+                }
+            }
+        }
+
+        // =============================================================
+        // Core Dashboard Logic / 儀表板核心控制邏輯
+        // =============================================================
+
+        const strategies = {
+            'mock': new MockYahooMarketDataStrategy(),
+            'yahoo': new ApiMarketDataStrategy()
+        };
+
+        let activeStrategyKey = 'yahoo';
+        let dataProvider = strategies[activeStrategyKey];
+        let globalConstituents = [];
+        let myChart = null;
+
+        const formatPct = (val) => (val * 100).toFixed(3) + '%';
+        const formatMoney = (val) => '$' + val.toFixed(2);
+        const formatChange = (amt, pct) => {
+            const up = amt > 0;
+            return `<span class="${up ? 'positive-text' : 'negative-text'} font-semibold">
+                      ${up ? '▲ ' : '▼ '}${Math.abs(amt).toFixed(2)} (${(pct * 100).toFixed(2)}%)
+                    </span>`;
+        };
+        const formatColor = (val) => {
+            if (val > 0.0001) return 'positive-text';
+            if (val < -0.0001) return 'negative-text';
+            return 'text-tmuted';
+        };
+
+        function setUIDisabled(isDisabled) {
+            const t = translations[currentLang];
+            const tbody = document.getElementById('constituentsTableBody');
+            const container = document.getElementById('tableContainer');
+
+            if (isDisabled) {
+                document.body.classList.add('loading-cursor');
+                container.classList.add('loading-opacity');
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-tmain animate-pulse">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    ${t.loadingData}</td></tr>`;
+
+                document.getElementById('sourceSelector').disabled = true;
+                document.getElementById('themeSelector').disabled = true;
+                document.getElementById('btnCalculate').disabled = true;
+            } else {
+                document.body.classList.remove('loading-cursor');
+                container.classList.remove('loading-opacity');
+                document.getElementById('sourceSelector').disabled = false;
+                document.getElementById('themeSelector').disabled = false;
+                document.getElementById('btnCalculate').disabled = false;
+            }
+        }
+
+        async function switchStrategy(strategyKey) {
+            activeStrategyKey = strategyKey;
+            dataProvider = strategies[strategyKey];
+            hasLoadedData = false;
+
+            // clear data instead of auto-fetching
+            globalConstituents = [];
+            document.getElementById('resultsPanel').classList.add('hidden');
+            const tbody = document.getElementById('constituentsTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-tmuted font-medium text-base">👈 Please click "Calculate Distortion" / 請點擊「計算失真利差」 👉</td></tr>`;
+
+            const activeStrategyName = document.getElementById('sourceSelector').options[document.getElementById('sourceSelector').selectedIndex].text;
+            document.getElementById('lblLiveSim').innerText = `${translations[currentLang].liveSim} ${activeStrategyName}`;
+        }
+
+        async function reloadData() {
+            setUIDisabled(true);
+            const dateStr = document.getElementById('simulateDate').value;
+            try {
+                // Attempt to update official weights from live sources once
+                const isMock = dataProvider instanceof MockYahooMarketDataStrategy;
+                if (!hasLoadedData && !isMock) {
+                    await dataProvider.fetchOfficialWeightsFromSOXX();
+                    hasLoadedData = true;
+                }
+
+                globalConstituents = await dataProvider.fetchConstituents(dateStr);
+                renderTable(globalConstituents);
+                renderChart(globalConstituents);
+
+                // Ensure data date is updated even if calculateDistortion isn't fully called (initial load)
+                if (globalConstituents.length > 0 && document.getElementById('resDataDate')) {
+                    const anyDate = globalConstituents[0].date || dateStr;
+                    document.getElementById('resDataDate').innerText = anyDate;
+                }
+                document.getElementById('resultsPanel').classList.add('hidden');
+            } catch (error) {
+                log.error("載入核心資料時發生嚴重錯誤:", error);
+                alert("Data loading failed. Check Developer Console for details.");
+            } finally {
+                setUIDisabled(false);
+            }
+        }
+
+        let sortConfig = { key: null, direction: 'desc' };
+
+        function handleSort(key) {
+            if (globalConstituents.length === 0) return;
+
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'desc';
+            }
+
+            globalConstituents.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+
+                if (typeof valA === 'string') {
+                    return sortConfig.direction === 'asc'
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                } else {
+                    return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+                }
+            });
+
+            renderTable(globalConstituents);
+            updateSortIndicators(key);
+        }
+
+        function updateSortIndicators(activeKey) {
+            const headers = ['colTicker', 'colCompany', 'colPrice', 'colChange', 'colOfficial', 'colTrue', 'colSpread', 'colMag'];
+            const t = translations[currentLang];
+            const originalKeys = {
+                colTicker: t.colTicker, colCompany: t.colCompany, colPrice: t.colPrice,
+                colChange: t.colChange, colOfficial: t.colOfficial, colTrue: t.colTrue, colSpread: t.colSpread, colMag: t.colMag
+            };
+
+            headers.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const arrow = sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
+                    el.innerText = originalKeys[id] + (activeKey && id.toLowerCase().includes(activeKey.toLowerCase()) ? arrow : '');
+                }
+            });
+        }
+
+        async function loadDashboard() {
+            document.getElementById('langSelector').addEventListener('change', (e) => updateLanguage(e.target.value));
+            document.getElementById('sourceSelector').addEventListener('change', (e) => switchStrategy(e.target.value));
+            document.getElementById('backtestForm').addEventListener('submit', calculateDistortion);
+            document.getElementById('themeSelector').addEventListener('change', (e) => applyTheme(e.target.value));
+
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 10);
+            document.getElementById('simulateDate').value = localISOTime;
+
+            document.getElementById('langSelector').value = currentLang;
+            document.getElementById('sourceSelector').value = activeStrategyKey;
+
+            // Set default theme from DOM if exist
+            const startingTheme = "dark";
+            document.getElementById('themeSelector').value = startingTheme;
+            applyTheme(startingTheme);
+
+            updateLanguage(currentLang);
+
+            // Set initial table message
+            const tbody = document.getElementById('constituentsTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-tmuted font-medium text-base">👈 Please click "Fetch Data" / 請點擊上方「取得資料」按鈕 👉</td></tr>`;
+        }
+
+        const compNamesZh = {
+            "NVDA": "輝達", "TSM": "台積電", "AVGO": "博通", "ASML": "艾司摩爾",
+            "AMD": "超微", "QCOM": "高通", "TXN": "德州儀器", "AMAT": "應用材料",
+            "INTC": "英特爾", "MU": "美光", "LRCX": "科林研發", "ADI": "亞德諾半導體",
+            "KLAC": "科磊", "NXPI": "恩智浦", "MRVL": "邁威爾", "SNPS": "新思科技",
+            "CDNS": "益華電腦", "ON": "安森美半導體", "MCHP": "微晶片科技", "ARM": "安謀科技",
+            "WDC": "威騰電子", "SWKS": "思佳訊", "MPWR": "芯源系統", "TER": "泰瑞達",
+            "QRVO": "科沃", "WOLF": "科銳 (Wolfspeed)", "LSCC": "萊迪思半導體",
+            "RMBS": "Rambus", "ALGM": "快特微電子", "SLAB": "芯科實驗室"
+        };
+
+        function renderTable(data) {
+            const tbody = document.getElementById('constituentsTableBody');
+            tbody.innerHTML = '';
+
+            // Calculate and display index theoretical change
+            let theoreticalReturn = 0;
+            data.forEach(c => theoreticalReturn += c.dailyChangePct * c.officialWeight);
+            const lblIdx = document.getElementById('lblIndexChange');
+            if (lblIdx) {
+                lblIdx.style.display = data.length > 0 ? "inline-block" : "none";
+                const isUp = theoreticalReturn > 0;
+                lblIdx.className = `text-sm font-semibold px-3 py-1 rounded-md border text-tmain border-borderc ${isUp ? 'bg-positive/20 text-positive border-positive/30' : 'bg-negative/20 text-negative border-negative/30'}`;
+                lblIdx.innerHTML = `${translations[currentLang].todayChange || 'Theoretical:'} <span class="font-bold">${isUp ? '+' : ''}${(theoreticalReturn * 100).toFixed(3)}%</span>`;
+            }
+
+            data.forEach((c) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-input transition-colors";
+
+                const dName = currentLang === 'zh' ? (compNamesZh[c.ticker] || c.companyName) : c.companyName;
+
+                const t = translations[currentLang];
+
+                tr.innerHTML = `
+                    <td class="px-3 py-4 whitespace-nowrap font-bold text-tmain" title="${t.ttTicker}">${c.ticker}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-tmain truncate max-w-[150px]" title="${dName}">${dName}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono text-tmain" title="${t.ttPrice}">${formatMoney(c.livePrice)}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono whitespace-nowrap" title="${t.ttChange}">${formatChange(c.dailyChangeAmt, c.dailyChangePct)}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono" title="${t.ttOfficial}">${formatPct(c.officialWeight)}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono" title="${t.ttTrue}">${formatPct(c.trueWeight)}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono font-semibold ${formatColor(c.spread)}" title="${t.ttSpread}">
+                        ${c.spread > 0 ? '+' : ''}${formatPct(c.spread)}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-right font-mono text-xs text-tmuted px-1 opacity-80" title="${t.titleMagnification || 'Magnification'}">x${c.mag ? c.mag.toFixed(2) : '1.00'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            const t = translations[currentLang];
+
+            const top10 = [...data].sort((a, b) => b.trueWeight - a.trueWeight).slice(0, 10);
+            const labels = top10.map(d => currentLang === 'zh' ? (compNamesZh[d.ticker] || d.companyName) : d.ticker);
+            const dataOfficial = top10.map(d => Number((d.officialWeight * 100).toFixed(2)));
+            const dataTrue = top10.map(d => Number((d.trueWeight * 100).toFixed(2)));
+
+            if (myChart) myChart.destroy();
+
+            // Handle Theme text colors
+            let chartFontColor = '#94a3b8'; // default dark
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            if (currentTheme === "executive" || currentTheme === "apple" || currentTheme === "material" || currentTheme === "kawaii" || currentTheme === "retro") {
+                chartFontColor = '#475569'; // darker text
+            } else if (currentTheme === "high-contrast") {
+                chartFontColor = '#ffffff'; // high contrast bright
+            }
+
+            Chart.defaults.color = chartFontColor;
+
+            // Get root font family for canvas
+            const cssFont = getComputedStyle(document.documentElement).getPropertyValue('--font-family') || 'sans-serif';
+            Chart.defaults.font.family = cssFont;
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: t.chartLabelOfficial,
+                            data: dataOfficial,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: t.chartLabelTrue,
+                            data: dataTrue,
+                            backgroundColor: 'rgba(20, 184, 166, 0.7)',
+                            borderColor: 'rgb(20, 184, 166)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: currentTheme === 'high-contrast' ? '#ffffff' : (currentTheme === 'dark' ? '#334155' : '#e2e8f0') }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        async function calculateDistortion(e) {
+            e.preventDefault();
+            const dateStr = document.getElementById('simulateDate').value;
+            if (!dateStr) return;
+
+            const btn = document.getElementById('btnCalculate');
+            const lblBtn = document.getElementById('lblBtnCalculate');
+            const t = translations[currentLang];
+
+            const isMock = dataProvider instanceof MockYahooMarketDataStrategy;
+
+            btn.disabled = true;
+            lblBtn.innerText = t.btnCalculating;
+
+            if (!isMock) {
+                document.body.classList.add('loading-cursor');
+                document.getElementById('shinchanGhost').style.display = 'block';
+            }
+
+            try {
+                // Ensure we have fresh data for the selected date
+                await reloadData();
+
+                if (!globalConstituents || globalConstituents.length === 0) {
+                    throw new Error("No constituent data available.");
+                }
+
+                let theoreticalReturn = 0;
+                let trueCapReturn = 0;
+
+                for (const c of globalConstituents) {
+                    theoreticalReturn += c.dailyChangePct * c.officialWeight;
+                    trueCapReturn += c.dailyChangePct * c.trueWeight;
+                }
+
+                // Fetch Actual ^SOX Index benchmark for comparison
+                const resSox = await dataProvider.fetchDailyReturn("^SOX", dateStr);
+                const actualSoxReturn = resSox.ret;
+                const actualSoxPrice = resSox.price;
+                const actualSoxChange = resSox.change;
+
+                // Update Data Date display & Weekend Note
+                if (document.getElementById('resDataDate')) {
+                    const matchedDate = resSox.date || dateStr;
+                    document.getElementById('resDataDate').innerText = matchedDate;
+
+                    const weekendNote = document.getElementById('weekendNote');
+                    const mktStatusLabel = document.getElementById('marketStatusLabel'); // Helper label
+                    const mktStatus = document.getElementById('marketStatus');
+
+                    if (weekendNote && mktStatus) {
+                        // If selected date is NOT the same as actual data date, it's a non-trading day
+                        if (matchedDate !== dateStr) {
+                            weekendNote.classList.remove('hidden');
+                            mktStatus.innerText = t.mktClosed;
+                            mktStatus.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-tmuted/20 text-tmuted border border-borderc";
+                        } else {
+                            // double check if it's a weekend just in case matchedDate was same as dateStr (though fetcher returns latest Friday)
+                            const d = new Date(dateStr);
+                            const day = d.getUTCDay(); // 0 is Sun, 6 is Sat
+                            if (day === 0 || day === 6) {
+                                weekendNote.classList.remove('hidden');
+                                mktStatus.innerText = t.mktClosed;
+                                mktStatus.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-tmuted/20 text-tmuted border border-borderc";
+                            } else {
+                                weekendNote.classList.add('hidden');
+                                mktStatus.innerText = t.mktOpen;
+                                mktStatus.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-positive/20 text-positive border border-positive/30";
+                            }
+                        }
+                    }
+                }
+
+                // Spread is defined as (Theoretical Official-Weighted Return) - (Actual SOX Index Return)
+                // If negative, it means the 30-stock portfolio is lagging the real index.
+                const spread = theoreticalReturn - actualSoxReturn;
+
+                // --- Update Results UI ---
+                // 1. Unify the Header label next to Table Title
+                renderTable(globalConstituents);
+
+                // 2. Update Result Panels
+                document.getElementById('resOfficial').innerText = formatPct(theoreticalReturn);
+                document.getElementById('resOfficial').className = `font-mono font-bold ${formatColor(theoreticalReturn)}`;
+
+                document.getElementById('resTrue').innerText = formatPct(trueCapReturn);
+                document.getElementById('resTrue').className = `font-mono font-bold ${formatColor(trueCapReturn)}`;
+
+                // Current Distortion = True Return - Theoretical Return
+                const internalDistortion = trueCapReturn - theoreticalReturn;
+                document.getElementById('resSpread').innerText = `${internalDistortion > 0 ? '+' : ''}${formatPct(internalDistortion)}`;
+                document.getElementById('resSpread').className = `font-mono font-bold text-2xl ${formatColor(internalDistortion)}`;
+
+                // 3. Update Actual SOX Card
+                document.getElementById('soxPrice').innerText = actualSoxPrice ? actualSoxPrice.toFixed(2) + " pts" : "--";
+                document.getElementById('soxChange').innerHTML = formatChange(actualSoxChange, actualSoxReturn);
+                if (document.getElementById('lblActualIndexHeader')) {
+                    document.getElementById('lblActualIndexHeader').innerText = t.actualSoxHeader;
+                }
+
+                document.getElementById('resultsPanel').classList.remove('hidden');
+
+            } catch (error) {
+                log.error("Distortion calculation failed:", error);
+            } finally {
+                btn.disabled = false;
+                lblBtn.innerText = t.btnCalculate;
+                document.body.classList.remove('loading-cursor');
+                document.getElementById('shinchanGhost').style.display = 'none';
+            }
+        }
+
+        function applyTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            if (myChart && globalConstituents && globalConstituents.length > 0) {
+                renderChart(globalConstituents);
+            }
+        }
+
+        /**
+         * Custom Calendar Logic
+         */
+        let calCurrentDate = new Date();
+        let calSelectedDate = null;
+
+        function initCalendar() {
+            const display = document.getElementById('dateDisplay');
+            const popup = document.getElementById('calendarPopup');
+            const ghost = document.getElementById('shinchanGhost');
+
+            // Default to Today
+            const now = new Date();
+            const todayStr = now.toISOString().slice(0, 10);
+            calSelectedDate = todayStr;
+            display.value = todayStr;
+            document.getElementById('simulateDate').value = todayStr;
+
+            // Ghost cursor tracking
+            document.addEventListener('mousemove', (e) => {
+                if (document.body.classList.contains('loading-cursor')) {
+                    ghost.style.left = e.clientX + 'px';
+                    ghost.style.top = e.clientY + 'px';
+                }
+            });
+
+            display.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+                renderCalendar();
+            });
+
+            document.addEventListener('click', () => {
+                popup.style.display = 'none';
+            });
+
+            popup.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarMonthYear');
+            grid.innerHTML = '';
+
+            const year = calCurrentDate.getFullYear();
+            const month = calCurrentDate.getMonth();
+
+            // Format title
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            title.innerText = `${monthNames[month]} ${year}`;
+
+            // Weekday headers
+            const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            days.forEach(d => {
+                const div = document.createElement('div');
+                div.className = 'calendar-day-head';
+                div.innerText = d;
+                grid.appendChild(div);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            const prevLastDate = new Date(year, month, 0).getDate();
+
+            // Prev month padding
+            for (let i = firstDay; i > 0; i--) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerText = prevLastDate - i + 1;
+                grid.appendChild(div);
+            }
+
+            // Current month days
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const todayStr = now.toISOString().slice(0, 10);
+
+            for (let i = 1; i <= lastDate; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+
+                const d = new Date(year, month, i);
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                if (dateStr === todayStr) div.classList.add('today');
+                if (calSelectedDate === dateStr) div.classList.add('active');
+
+                // Disable future dates
+                if (d > now) {
+                    div.classList.add('disabled');
+                }
+
+                div.innerText = i;
+                if (!div.classList.contains('disabled')) {
+                    div.onclick = () => selectCalendarDate(dateStr);
+                }
+                grid.appendChild(div);
+            }
+        }
+
+        function changeMonth(delta) {
+            calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function selectCalendarDate(dateStr) {
+            calSelectedDate = dateStr;
+            document.getElementById('dateDisplay').value = dateStr;
+            document.getElementById('simulateDate').value = dateStr;
+            document.getElementById('calendarPopup').style.display = 'none';
+        }
+
+        function setQuickDate(type) {
+            const now = new Date();
+            let target = new Date();
+
+            if (type === 'yesterday') {
+                target.setDate(now.getDate() - 1);
+            } else if (type === 'friday') {
+                const day = now.getDay();
+                const diff = (day <= 5) ? (day + 2) : (day - 5);
+                target.setDate(now.getDate() - diff);
+            }
+
+            const tzoffset = target.getTimezoneOffset() * 60000;
+            const isoTime = (new Date(target.getTime() - tzoffset)).toISOString().slice(0, 10);
+
+            calCurrentDate = new Date(target);
+            selectCalendarDate(isoTime);
+        }
+
+        // Boot
+        loadDashboard();
+        initCalendar();
+
+    </script>
+</body>
+
+</html>

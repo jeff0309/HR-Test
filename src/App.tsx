@@ -21,6 +21,7 @@ import {
   UserPlus,
   FileDown,
   CheckCircle2,
+  BarChart3,
   Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -381,6 +382,17 @@ export default function App() {
                         className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 shadow-sm"
                       >
                         <Play className="w-4 h-4" /> 玩貪食蛇遊戲 (Snake Game)
+                      </a>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#141414]/5">
+                      <a
+                        href="./sox_dashboard.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl font-bold hover:bg-blue-100 transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <BarChart3 className="w-4 h-4" /> SOX Dashboard
                       </a>
                     </div>
 
